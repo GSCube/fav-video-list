@@ -1,8 +1,9 @@
 "use client"
 import { useSession } from 'next-auth/react'
 import { redirect } from 'next/navigation'
-import {useEffect, useState} from "react";
-import { Typography } from '@mui/material';
+import React, {useEffect, useState} from "react";
+import { Typography, Button } from '@mui/material';
+import {Video, VideoTable} from './Table';
 
 const deleteVideo = async (accessToken: string, id: string) => {
     if (!accessToken) {
@@ -77,28 +78,34 @@ export const FavouriteMoviesList = () => {
         })
     }
 
+    const handlePlay = (id: string) => {
+        console.log('play', id)
+    }
+
     console.log('favorites', favorites)
+
+    const ytVideos: Video[]  = favorites?.map((favorite) => ({
+        // @ts-ignore
+        id: favorite.id,
+        // @ts-ignore
+        title: favorite.snippet.title,
+        watchCount: 0,
+        dateAdded: '2021-10-10',
+        // @ts-ignore
+        thumbnail: favorite.snippet.thumbnails.default.url,
+    }))
 
     return (
         <section>
             <Typography variant="h3" component="h2">
                 Favorites Movies list
             </Typography>
-            {favorites?.map((favorite) => (
-                // @ts-ignore
-                <div key={favorite.id}>
-                    {/*@ts-ignore*/}
-                    <h2>{favorite.snippet.title}</h2>
-                    {/*@ts-ignore*/}
-                    <img src={favorite.snippet.thumbnails.default.url} alt={favorite.snippet.title} />
-                    <button>Play</button>
-                    {/*@ts-ignore*/}
-                    <button onClick={() => handleVideoDelete(favorite.id)}>Remove</button>
-                </div>
-            ))}
 
 
-            <button onClick={handleFetchFavorites}>get</button>
+            {ytVideos && <VideoTable videos={ytVideos} onPlay={handlePlay} onDelete={handleVideoDelete} />}
+
+
+            <Button onClick={handleFetchFavorites}>get</Button>
         </section>
     )
 }
