@@ -6,7 +6,9 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import {Button} from "@mui/material";
+import {IconButton} from "@mui/material";
+import DeleteIcon from '@mui/icons-material/Delete';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 
 function createData(
     name: string,
@@ -15,7 +17,7 @@ function createData(
     carbs: number,
     protein: number,
 ) {
-    return { name, calories, fat, carbs, protein };
+    return {name, calories, fat, carbs, protein};
 }
 
 const rows = [
@@ -28,7 +30,8 @@ const rows = [
 
 
 export interface Video {
-    id: string;
+    playlistElementId: string;
+    videoId: string;
     title: string;
     thumbnail: string;
     dateAdded: string;
@@ -41,10 +44,13 @@ interface VideoTableProps {
     onPlay: (id: string) => void;
 }
 
+
+
 export const VideoTable: React.FC<VideoTableProps> = ({videos, onDelete, onPlay}) => {
+
     return (
         <TableContainer component={Paper}>
-            <Table sx={{ minWidth: 650 }} aria-label="simple table">
+            <Table sx={{minWidth: 650}} aria-label="simple table">
                 <TableHead>
                     <TableRow>
                         <TableCell>Video</TableCell>
@@ -55,13 +61,13 @@ export const VideoTable: React.FC<VideoTableProps> = ({videos, onDelete, onPlay}
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {videos?.map(({id, title, watchCount, thumbnail,}) => (
+                    {videos?.map(({videoId, title, watchCount, thumbnail,playlistElementId}) => (
                         <TableRow
-                            key={id}
-                            sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                            key={playlistElementId}
+                            sx={{'&:last-child td, &:last-child th': {border: 0}}}
                         >
                             <TableCell component="th" scope="row">
-                                <img onClick={() => onPlay(id)} src={thumbnail} alt=""/>
+                                <img onClick={() => onPlay(videoId)} src={thumbnail} alt=""/>
                             </TableCell>
                             <TableCell component="th" scope="row">
                                 {title}
@@ -73,8 +79,12 @@ export const VideoTable: React.FC<VideoTableProps> = ({videos, onDelete, onPlay}
                                 Data dodania
                             </TableCell><
                             TableCell component="th" scope="row">
-                                <Button onClick={() => onPlay(id)}>Play</Button>
-                                <Button onClick={() => onDelete(id)}>Remove</Button>
+                            <IconButton onClick={() => onPlay(videoId)} aria-label="delete">
+                                <PlayArrowIcon/>
+                            </IconButton>
+                            <IconButton onClick={() => onDelete(playlistElementId)} aria-label="delete">
+                                <DeleteIcon/>
+                            </IconButton>
                         </TableCell>
                         </TableRow>
                     ))}

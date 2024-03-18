@@ -4,6 +4,17 @@ import { redirect } from 'next/navigation'
 import React, {useEffect, useState} from "react";
 import { Typography, Button } from '@mui/material';
 import {Video, VideoTable} from './Table';
+import {Modal} from "@mui/material";
+import {Box} from "@mui/system";
+import YouTube from "react-youtube";
+
+const style = {
+    position: 'absolute' as 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    boxShadow: 24,
+};
 
 const deleteVideo = async (accessToken: string, id: string) => {
     if (!accessToken) {
@@ -44,6 +55,8 @@ const fetchFavorites = async (accessToken: string) => {
 };
 
 export const FavouriteMoviesList = () => {
+    const [open, setOpen] = React.useState(false);
+    const [selectedVideoId, setSelectedVideoId] = React.useState('');
     const [favorites, setFavorites] = useState([]);
     const { data: session } = useSession({
         required: true,
@@ -52,6 +65,10 @@ export const FavouriteMoviesList = () => {
         }
     })
 
+    const handleClose = () =>{
+        console.log('close')
+        setOpen(false);
+    }
     // @ts-ignore
     console.log('session in component', session)
     // console.log('session', session?.token?.token?.account?.access_token)
@@ -66,6 +83,8 @@ export const FavouriteMoviesList = () => {
         })
     }
 
+    console.log('favorites', favorites)
+
     useEffect(() => {
         handleFetchFavorites()
     }, [accessToken]);
@@ -79,14 +98,17 @@ export const FavouriteMoviesList = () => {
     }
 
     const handlePlay = (id: string) => {
-        console.log('play', id)
+        setSelectedVideoId(id)
+        setOpen(true)
     }
 
     console.log('favorites', favorites)
 
     const ytVideos: Video[]  = favorites?.map((favorite) => ({
         // @ts-ignore
-        id: favorite.id,
+        playlistElementId: favorite.id,
+        // @ts-ignore
+        videoId: favorite.snippet.resourceId.videoId,
         // @ts-ignore
         title: favorite.snippet.title,
         watchCount: 0,
@@ -105,6 +127,33 @@ export const FavouriteMoviesList = () => {
             {ytVideos && <VideoTable videos={ytVideos} onPlay={handlePlay} onDelete={handleVideoDelete} />}
 
 
+            <Modal
+                open={open}
+                onClose={handleClose}
+                aria-labelledby="modal-modal-title"
+                aria-describedby="modal-modal-description"
+            >
+                <Box sx={style}>
+                    <YouTube
+                        videoId={selectedVideoId}                  // defaults -> ''
+                        // id={string}                       // defaults -> ''
+                        // className={string}                // defaults -> ''
+                        // iframeClassName={string}          // defaults -> ''
+                        // style={object}                    // defaults -> {}
+                        // title={string}                    // defaults -> ''
+                        // loading={string}                  // defaults -> undefined
+                        // opts={obj}                        // defaults -> {}
+                        // onReady={func}                    // defaults -> noop
+                        // onPlay={func}                     // defaults -> noop
+                        // onPause={func}                    // defaults -> noop
+                        // onEnd={func}                      // defaults -> noop
+                        // onError={func}                    // defaults -> noop
+                        // onStateChange={func}              // defaults -> noop
+                        // onPlaybackRateChange={func}       // defaults -> noop
+                        // onPlaybackQualityChange={func}    // defaults -> noop
+                    />
+                </Box>
+            </Modal>
             <Button onClick={handleFetchFavorites}>get</Button>
         </section>
     )
