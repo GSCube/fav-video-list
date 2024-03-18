@@ -16,6 +16,23 @@ const style = {
   boxShadow: 24,
 };
 
+interface YoutubeVideo {
+  id: string;
+  snippet: {
+    title: string;
+    resourceId: {
+      videoId: string;
+    }
+    publishedAt: string;
+    thumbnails: {
+      default: {
+        url: string;
+      }
+    }
+  }
+}
+
+
 const deleteVideo = async (accessToken: string, id: string) => {
   if (!accessToken) {
     return
@@ -57,7 +74,7 @@ const fetchFavorites = async (accessToken: string) => {
 export const FavouriteMoviesList = () => {
   const [open, setOpen] = React.useState(false);
   const [selectedVideoId, setSelectedVideoId] = React.useState('');
-  const [favorites, setFavorites] = useState([]);
+  const [favorites, setFavorites] = useState<YoutubeVideo[]>([]);
   const {data: session} = useSession({
     required: true,
     onUnauthenticated() {
@@ -65,13 +82,9 @@ export const FavouriteMoviesList = () => {
     }
   })
 
-  const handleClose = () => {
-    console.log('close')
-    setOpen(false);
-  }
-  // @ts-ignore
   console.log('session in component', session)
   // console.log('session', session?.token?.token?.account?.access_token)
+
   // @ts-ignore
   const {accessToken} = session || {}
 
@@ -105,16 +118,11 @@ export const FavouriteMoviesList = () => {
   console.log('favorites', favorites)
 
   const ytVideos: Video[] = favorites?.map((favorite) => ({
-    // @ts-ignore
     playlistElementId: favorite.id,
-    // @ts-ignore
     videoId: favorite.snippet.resourceId.videoId,
-    // @ts-ignore
     title: favorite.snippet.title,
     watchCount: 0,
-    // @ts-ignore
     dateAdded: favorite.snippet.publishedAt,
-    // @ts-ignore
     thumbnail: favorite.snippet.thumbnails.default.url,
   }))
 
@@ -130,7 +138,7 @@ export const FavouriteMoviesList = () => {
 
       <Modal
         open={open}
-        onClose={handleClose}
+        onClose={() => setOpen(false)}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
       >
