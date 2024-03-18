@@ -9,6 +9,7 @@ import Paper from '@mui/material/Paper';
 import {IconButton} from "@mui/material";
 import DeleteIcon from '@mui/icons-material/Delete';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import dayjs from "dayjs";
 
 function createData(
   name: string,
@@ -60,7 +61,7 @@ export const VideoTable: React.FC<VideoTableProps> = ({videos, onDelete, onPlay}
           </TableRow>
         </TableHead>
         <TableBody>
-          {videos?.map(({videoId, title, watchCount, thumbnail, playlistElementId}) => (
+          {videos?.map(({videoId, title, watchCount, thumbnail, playlistElementId, dateAdded}) => (
             <TableRow
               key={playlistElementId}
               sx={{'&:last-child td, &:last-child th': {border: 0}}}
@@ -75,7 +76,7 @@ export const VideoTable: React.FC<VideoTableProps> = ({videos, onDelete, onPlay}
                 {watchCount}
               </TableCell>
               <TableCell component="th" scope="row">
-                Data dodania
+                {dayjs(dateAdded).format('DD-MM-YYYY')}
               </TableCell><
               TableCell component="th" scope="row">
               <IconButton onClick={() => onPlay(videoId)} aria-label="delete">

@@ -112,7 +112,8 @@ export const FavouriteMoviesList = () => {
     // @ts-ignore
     title: favorite.snippet.title,
     watchCount: 0,
-    dateAdded: '2021-10-10',
+    // @ts-ignore
+    dateAdded: favorite.snippet.publishedAt,
     // @ts-ignore
     thumbnail: favorite.snippet.thumbnails.default.url,
   }))
