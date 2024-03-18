@@ -3,34 +3,13 @@ import {useSession} from 'next-auth/react'
 import {redirect} from 'next/navigation'
 import React, {useEffect, useState} from "react";
 import {Typography, Button} from '@mui/material';
-import {Video, VideoTable} from './Table';
+import {Video, VideoTable} from '../Table';
 import {Modal} from "@mui/material";
 import {Box} from "@mui/system";
 import YouTube from "react-youtube";
-
-const style = {
-  position: 'absolute' as 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  boxShadow: 24,
-};
-
-interface YoutubeVideo {
-  id: string;
-  snippet: {
-    title: string;
-    resourceId: {
-      videoId: string;
-    }
-    publishedAt: string;
-    thumbnails: {
-      default: {
-        url: string;
-      }
-    }
-  }
-}
+import {modalStyle} from "@/components/FavouriteMoviesList/styles";
+import {formatYoutubePlaylist} from "@/components/FavouriteMoviesList/utils";
+import {YoutubeVideo} from "@/components/FavouriteMoviesList/types";
 
 
 const deleteVideo = async (accessToken: string, id: string) => {
@@ -117,14 +96,7 @@ export const FavouriteMoviesList = () => {
 
   console.log('favorites', favorites)
 
-  const ytVideos: Video[] = favorites?.map((favorite) => ({
-    playlistElementId: favorite.id,
-    videoId: favorite.snippet.resourceId.videoId,
-    title: favorite.snippet.title,
-    watchCount: 0,
-    dateAdded: favorite.snippet.publishedAt,
-    thumbnail: favorite.snippet.thumbnails.default.url,
-  }))
+  const ytVideos: Video[] = favorites?.map(formatYoutubePlaylist)
 
   return (
     <section>
@@ -142,7 +114,7 @@ export const FavouriteMoviesList = () => {
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
       >
-        <Box sx={style}>
+        <Box sx={modalStyle}>
           <YouTube
             videoId={selectedVideoId}
           />
