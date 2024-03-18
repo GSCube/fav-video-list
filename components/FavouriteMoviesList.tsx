@@ -4,7 +4,6 @@ import { redirect } from 'next/navigation'
 import {useEffect, useState} from "react";
 import { Typography } from '@mui/material';
 
-
 const deleteVideo = async (accessToken: string, id: string) => {
     if (!accessToken) {
         return
@@ -86,10 +85,14 @@ export const FavouriteMoviesList = () => {
                 Favorites Movies list
             </Typography>
             {favorites?.map((favorite) => (
+                // @ts-ignore
                 <div key={favorite.id}>
+                    {/*@ts-ignore*/}
                     <h2>{favorite.snippet.title}</h2>
+                    {/*@ts-ignore*/}
                     <img src={favorite.snippet.thumbnails.default.url} alt={favorite.snippet.title} />
                     <button>Play</button>
+                    {/*@ts-ignore*/}
                     <button onClick={() => handleVideoDelete(favorite.id)}>Remove</button>
                 </div>
             ))}
