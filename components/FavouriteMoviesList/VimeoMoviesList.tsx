@@ -3,7 +3,7 @@
 // if we want simple solution with displaying separate list and components for different video platforms
 // as for youtube we would do for vimeo similar to YoutubeMoviesList.tsx file
 
-import { Typography } from '@mui/material';
+import { Typography, Alert } from '@mui/material';
 
 export const VimeoMoviesList = () => {
   return (
@@ -12,13 +12,19 @@ export const VimeoMoviesList = () => {
         Vimeo Movies List will be in future here
       </Typography>
       <Typography variant="body1">
-        Here (or in setting) user will need to authenticate with vimeo account
+        As simplest solution here (or in setting) user will need to authenticate with
+        vimeo account
       </Typography>
-      <Typography variant="body1">here goes table with Viemo videos</Typography>
-      <Typography variant="body2">
-        Easy way we could display viemo videos raws in same table with YT videos But
-        pagination, deleting and adding videos would be much more complicated
-      </Typography>
+      <Alert severity="info">
+        <Typography variant="body1">here goes table with Vimeo videos</Typography>
+      </Alert>
+      <Alert severity="warning">
+        <Typography variant="body1">
+          Also easy way we could display Vimeo videos raws in same table with YT videos
+          and even have different actions per different video provider. ...but pagination,
+          deleting and adding videos would be much more complicated
+        </Typography>
+      </Alert>
     </div>
   );
 };

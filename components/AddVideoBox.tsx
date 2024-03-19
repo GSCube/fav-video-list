@@ -1,5 +1,5 @@
 import React from 'react';
-import { Input, Button, Alert } from '@mui/material';
+import { Input, Button, Alert, Typography } from '@mui/material';
 import styled from 'styled-components';
 
 interface AddVideoBoxProps {
@@ -9,14 +9,18 @@ interface AddVideoBoxProps {
   isSuccess: boolean;
 }
 
-//styled wrapper
 const Wrapper = styled.div`
   display: flex;
   align-items: center;
-  margin-bottom: 20px;
+  margin-top: 20px;
+`;
+
+const Outer = styled.div`
+  display: flex;
   margin-top: 20px;
   padding: 16px;
-  background-color: #f5f5f5;
+  background-color: white;
+  flex-direction: column;
 `;
 
 export const AddVideoBox: React.FC<AddVideoBoxProps> = ({
@@ -29,19 +33,20 @@ export const AddVideoBox: React.FC<AddVideoBoxProps> = ({
 
   // TODO Add handling by form with validation with React Hook Form
   return (
-    <>
+    <Outer>
       {isError && <Alert severity="error">Wystąpił problem z dodaniem filmu</Alert>}
       {isSuccess && <Alert severity="info">Dodano</Alert>}
+      <Typography variant="h6">Add liked video</Typography>
       <Wrapper>
         <Input
           placeholder="Wpisz URL / ID filmu"
           value={url}
           onChange={({ target }) => setUrl(target.value)}
         />
-        <Button disabled={isLoading} onClick={() => onAdd(url)}>
+        <Button  disabled={isLoading} onClick={() => onAdd(url)}>
           Dodaj
         </Button>
       </Wrapper>
-    </>
+    </Outer>
   );
 };
