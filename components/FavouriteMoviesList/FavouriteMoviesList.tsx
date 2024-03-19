@@ -8,7 +8,7 @@ import { Box } from '@mui/system';
 import YouTube from 'react-youtube';
 import { modalStyle } from '@/components/FavouriteMoviesList/styles';
 import { prepareDataForYTVideos } from '@/components/FavouriteMoviesList/utils';
-import { addToFavorites, deleteFromFavorites, fetchFavorites } from '@/data/youtube';
+import { addLike, deleteFromFavorites, fetchFavorites } from '@/data/youtube';
 import {
   useQuery,
   useMutation,
@@ -92,7 +92,7 @@ export const FavouriteMoviesList = () => {
     isPending,
     isSuccess,
   } = useMutation({
-    mutationFn: (id: string) => addToFavorites(accessToken, id),
+    mutationFn: (id: string) => addLike(accessToken, id),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['videos'] });
     },

@@ -27,6 +27,17 @@ export const deleteFromFavorites = (accessToken: string, id: string) =>
     `${YOUTUBE_BASE_URL + PATHS.PLAYLIST_ITEMS}?access_token=${accessToken}&id=${id}`,
   );
 
+export const addLike = (accessToken: string, id: string) =>
+  axios.post(
+    `${YOUTUBE_BASE_URL}/videos/rate?access_token=${accessToken}&id=${youtubeParser(id)}&rating=like`,
+  );
+
+// ------->  Playground to remove, just left it to show the development process <-------
+// Proper way would be to document it in some ADR file or something similar
+// So other developers see where problems were and how they were solved
+
+// This approach didn't work for me because YT gives 500 error but....
+// is adding video to the playlist...anyway...but now always :)
 export const addToFavorites = (accessToken: string, id: string) =>
   axios.post(
     `${YOUTUBE_BASE_URL + PATHS.PLAYLIST_ITEMS}?part=snippet`,
@@ -49,7 +60,8 @@ export const addToFavorites = (accessToken: string, id: string) =>
     },
   );
 
-// Playground to remove, just left it to show the development process
+
+
 // Fetch solution experiment
 export const fetchFavoritesWithFetch = async (accessToken: string) => {
   if (!accessToken) {
