@@ -90,6 +90,7 @@ export const FavouriteMoviesList = () => {
     mutate: handleAdd,
     isError: isAddError,
     isPending,
+    isSuccess,
   } = useMutation({
     mutationFn: (id: string) => addToFavorites(accessToken, id),
     onSuccess: async () => {
@@ -120,7 +121,7 @@ export const FavouriteMoviesList = () => {
         Favorites Movies list
       </Typography>
 
-      <AddVideoBox onAdd={handleAdd} isError={isAddError} isLoading={isPending} />
+      <AddVideoBox onAdd={handleAdd} isError={isAddError} isLoading={isPending} isSuccess={isSuccess} />
 
       {tableData && (
         <VideoTable
