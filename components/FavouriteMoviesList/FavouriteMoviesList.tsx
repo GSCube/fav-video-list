@@ -1,102 +1,95 @@
 "use client"
 import {useSession} from 'next-auth/react'
 import {redirect} from 'next/navigation'
-import React, {useEffect, useState} from "react";
-import {Typography, Button} from '@mui/material';
+import React, {useState} from "react";
+import {Typography, Button, Modal, CircularProgress} from '@mui/material';
 import {Video, VideoTable} from '../Table';
-import {Modal} from "@mui/material";
 import {Box} from "@mui/system";
 import YouTube from "react-youtube";
 import {modalStyle} from "@/components/FavouriteMoviesList/styles";
 import {formatYoutubePlaylist} from "@/components/FavouriteMoviesList/utils";
-import {YoutubeVideo} from "@/components/FavouriteMoviesList/types";
+import {addToFavorites, deleteFromFavorites, fetchFavorites} from "@/data/youtube";
+import {useQuery, useMutation, useQueryClient} from "@tanstack/react-query";
+import RefreshIcon from '@mui/icons-material/Refresh';
+import DeleteIcon from '@mui/icons-material/Delete';
+import {AddVideoBox} from "@/components/AddVideoBox";
+import {AxiosError} from "axios";
 
 
-const deleteVideo = async (accessToken: string, id: string) => {
-  if (!accessToken) {
-    return
-  }
-  const response = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?id=${id}`, {
-    // const response = await fetch("https://www.googleapis.com/youtube/v3/playlists?part=snippet&mine=true", {
-    method: 'DELETE',
+const handleDeleteAll = async (moviesIds, handleAsyncDelete) => {
+  await Promise.all(moviesIds?.map((id) => handleAsyncDelete(id)))
+}
 
-    headers: {
-      // @ts-ignore
-      Authorization: `Bearer ${accessToken}`,
-      // Accept: "application/json",
-    },
-  });
+const refetchInterval = 2000 // 2 seconds
 
-
-  return response; // This will contain information about the user's favorite movies or videos
-};
-
-
-const fetchFavorites = async (accessToken: string) => {
-  if (!accessToken) {
-    return
-  }
-  const response = await fetch("https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=LL", {
-    // const response = await fetch("https://www.googleapis.com/youtube/v3/playlists?part=snippet&mine=true", {
-    headers: {
-      // @ts-ignore
-      Authorization: `Bearer ${accessToken || tempToken}`,
-      Accept: "application/json",
-    },
-  });
-
-  const data = await response.json();
-  console.log(data)
-  return data.items; // This will contain information about the user's favorite movies or videos
-};
-
+const REDIRECT_URL = '/api/auth/signin?callbackUrl=/'
 export const FavouriteMoviesList = () => {
-  const [open, setOpen] = React.useState(false);
-  const [selectedVideoId, setSelectedVideoId] = React.useState('');
-  const [favorites, setFavorites] = useState<YoutubeVideo[]>([]);
+  const ref = React.useRef(0);
+  const [nextPageToken, setNextPageToken] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
+  const queryClient = useQueryClient();
+  const [selectedVideoId, setSelectedVideoId] = useState('');
   const {data: session} = useSession({
     required: true,
     onUnauthenticated() {
-      redirect('/api/auth/signin?callbackUrl=/')
+      redirect(REDIRECT_URL)
     }
   })
-
-  console.log('session in component', session)
-  // console.log('session', session?.token?.token?.account?.access_token)
 
   // @ts-ignore
   const {accessToken} = session || {}
 
-
-  const handleFetchFavorites = () => {
-    fetchFavorites(accessToken).then((fav) => {
-      console.log('fav', fav)
-      setFavorites(fav)
+  const {data: playlists, isError, isLoading, refetch, error} =
+    useQuery({
+      queryKey: ['videos', nextPageToken],
+      queryFn: () => fetchFavorites(accessToken, nextPageToken),
+      enabled: !!accessToken,
+      refetchInterval
     })
+
+  if ((error as AxiosError)?.response?.status === 401) {
+    redirect(REDIRECT_URL)
   }
 
-  console.log('favorites', favorites)
+  const videos = playlists?.data?.items
+  const tableData: Video[] = videos?.map(formatYoutubePlaylist)
+  const pageInfo = playlists?.data?.pageInfo
+  const moviesIds = tableData?.map(({playlistElementId}) => playlistElementId)
 
-  useEffect(() => {
-    handleFetchFavorites()
-  }, [accessToken]);
+  const {mutate: handleDelete} = useMutation({
+    mutationFn: (id: string) => deleteFromFavorites(accessToken, id),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({queryKey: ['videos']})
+    },})
 
-  const handleVideoDelete = async (id: string) => {
-    await deleteVideo(accessToken, id)
-    await fetchFavorites(accessToken).then((fav) => {
-      console.log('fav', fav)
-      setFavorites(fav)
-    })
-  }
+  const { mutateAsync:handleAsyncDelete} = useMutation({
+    mutationFn: (id: string) => deleteFromFavorites(accessToken, id),
+    onMutate: async (id: string) => {
+      await queryClient.cancelQueries({queryKey: ['videos']})
+    },
+  })
+
+  const {mutate: handleAdd, isError: isAddError, isPending} = useMutation({
+    mutationFn: (id: string) => addToFavorites(accessToken, id),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({queryKey: ['videos']})
+    },
+  })
+
 
   const handlePlay = (id: string) => {
     setSelectedVideoId(id)
     setOpen(true)
   }
 
-  console.log('favorites', favorites)
+  if (isLoading || !videos) {
+    return <CircularProgress/>
+  }
 
-  const ytVideos: Video[] = favorites?.map(formatYoutubePlaylist)
+
+  if (isError) {
+    return <Typography variant="h3" component="h2">Error</Typography>
+  }
 
   return (
     <section>
@@ -104,9 +97,26 @@ export const FavouriteMoviesList = () => {
         Favorites Movies list
       </Typography>
 
+      <AddVideoBox onAdd={handleAdd} isError={isAddError} isLoading={isPending} />
 
-      {ytVideos && <VideoTable videos={ytVideos} onPlay={handlePlay} onDelete={handleVideoDelete}/>}
-
+      {tableData && (
+        <VideoTable
+          videos={tableData}
+          onPlay={handlePlay}
+          onDelete={(id) => handleDelete(id)}
+          onPageChange={(newPage) => {
+            if (newPage > ref.current) {
+              setNextPageToken(playlists?.data?.nextPageToken)
+            } else {
+              setNextPageToken(playlists?.data?.prevPageToken)
+            }
+            ref.current = newPage
+          }}
+          totalResults={pageInfo?.totalResults}
+          rowsPerPage={pageInfo?.resultsPerPage}
+          page={ref.current}
+        />
+      )}
 
       <Modal
         open={open}
@@ -120,7 +130,8 @@ export const FavouriteMoviesList = () => {
           />
         </Box>
       </Modal>
-      <Button onClick={handleFetchFavorites}>get</Button>
+      <Button onClick={() => refetch()}><RefreshIcon/>Refresh</Button>
+      <Button onClick={() => handleDeleteAll(moviesIds, handleAsyncDelete)} ><DeleteIcon/>Delete all (from this page)</Button>
     </section>
   )
 }

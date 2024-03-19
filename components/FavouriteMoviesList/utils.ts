@@ -1,5 +1,5 @@
 import {Video} from "@/components/Table";
-import {YoutubeVideo} from "@/components/FavouriteMoviesList/types";
+import {YoutubeVideo} from "@/data/types";
 
 export const formatYoutubePlaylist = (video: YoutubeVideo): Video => ({
   playlistElementId: video.id,

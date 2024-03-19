@@ -63,13 +63,8 @@ const config: NextAuthConfig = {
             return token
         },
         async session({session, token, user, newSession}) {
-            console.log('session in session', session)
-            console.log('token in session', token)
-            console.log('user in session', user)
-            console.log('', )
 
             if (token) {
-                session.user.id = '123';
                 // @ts-ignore
                 session.accessToken = token.accessToken;
                 // @ts-ignore
