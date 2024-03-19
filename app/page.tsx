@@ -1,5 +1,5 @@
-import styles from "./page.module.css";
-import {FavouriteMoviesList} from '@/components/FavouriteMoviesList';
+import styles from './page.module.css';
+import { FavouriteMoviesList } from '@/components/FavouriteMoviesList';
 
 export default function Home() {
   return (

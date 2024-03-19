@@ -6,12 +6,12 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import {IconButton} from "@mui/material";
+import { IconButton } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import dayjs from "dayjs";
-import styled from "styled-components";
-import {TablePagination} from "@mui/material";
+import dayjs from 'dayjs';
+import styled from 'styled-components';
+import { TablePagination } from '@mui/material';
 
 export interface Video {
   playlistElementId: string;
@@ -34,23 +34,21 @@ interface VideoTableProps {
 
 const Text = styled.p`
   max-width: 300px;
-`
+`;
 
-export const VideoTable: React.FC<VideoTableProps> = (
-  {
-    videos,
-    onDelete,
-    onPlay,
-    onPageChange,
-    totalResults,
-    rowsPerPage,
-    page
-  }) => {
-
+export const VideoTable: React.FC<VideoTableProps> = ({
+  videos,
+  onDelete,
+  onPlay,
+  onPageChange,
+  totalResults,
+  rowsPerPage,
+  page,
+}) => {
   return (
     <Paper>
       <TableContainer component={Paper}>
-        <Table sx={{minWidth: 650}} aria-label="simple table">
+        <Table sx={{ minWidth: 650 }} aria-label="simple table">
           <TableHead>
             <TableRow>
               <TableCell>Video</TableCell>
@@ -61,35 +59,42 @@ export const VideoTable: React.FC<VideoTableProps> = (
             </TableRow>
           </TableHead>
           <TableBody>
-            {videos?.map(({videoId, title, watchCount, thumbnail, playlistElementId, dateAdded}) => (
-              <TableRow
-                key={playlistElementId}
-                sx={{'&:last-child td, &:last-child th': {border: 0}}}
-              >
-                <TableCell component="th" scope="row">
-                  <img onClick={() => onPlay(videoId)} src={thumbnail} alt=""/>
-                </TableCell>
-                <TableCell component="th" scope="row">
-                  <Text>
-                    {title}
-                  </Text>
-                </TableCell>
-                <TableCell align="right" component="th" scope="row">
-                  {watchCount}
-                </TableCell>
-                <TableCell align="right" component="th" scope="row">
-                  {dayjs(dateAdded).format('DD-MM-YYYY')}
-                </TableCell>
-                <TableCell align="right" component="th" scope="row">
-                  <IconButton onClick={() => onPlay(videoId)}>
-                    <PlayArrowIcon/>
-                  </IconButton>
-                  <IconButton onClick={() => onDelete(playlistElementId)}>
-                    <DeleteIcon/>
-                  </IconButton>
-                </TableCell>
-              </TableRow>
-            ))}
+            {videos?.map(
+              ({
+                videoId,
+                title,
+                watchCount,
+                thumbnail,
+                playlistElementId,
+                dateAdded,
+              }) => (
+                <TableRow
+                  key={playlistElementId}
+                  sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                >
+                  <TableCell component="th" scope="row">
+                    <img onClick={() => onPlay(videoId)} src={thumbnail} alt="" />
+                  </TableCell>
+                  <TableCell component="th" scope="row">
+                    <Text>{title}</Text>
+                  </TableCell>
+                  <TableCell align="right" component="th" scope="row">
+                    {watchCount}
+                  </TableCell>
+                  <TableCell align="right" component="th" scope="row">
+                    {dayjs(dateAdded).format('DD-MM-YYYY')}
+                  </TableCell>
+                  <TableCell align="right" component="th" scope="row">
+                    <IconButton onClick={() => onPlay(videoId)}>
+                      <PlayArrowIcon />
+                    </IconButton>
+                    <IconButton onClick={() => onDelete(playlistElementId)}>
+                      <DeleteIcon />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ),
+            )}
           </TableBody>
         </Table>
       </TableContainer>
@@ -103,4 +108,4 @@ export const VideoTable: React.FC<VideoTableProps> = (
       />
     </Paper>
   );
-}
+};

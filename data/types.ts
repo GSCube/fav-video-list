@@ -4,13 +4,12 @@ export interface YoutubeVideo {
     title: string;
     resourceId: {
       videoId: string;
-    }
+    };
     publishedAt: string;
     thumbnails: {
       default: {
         url: string;
-      }
-    }
-  }
+      };
+    };
+  };
 }
-

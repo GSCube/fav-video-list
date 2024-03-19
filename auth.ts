@@ -1,6 +1,6 @@
-import NextAuth from "next-auth"
-import type {NextAuthConfig} from "next-auth"
-import GoogleProvider from "next-auth/providers/google";
+import NextAuth from 'next-auth';
+import type { NextAuthConfig } from 'next-auth';
+import GoogleProvider from 'next-auth/providers/google';
 
 const config: NextAuthConfig = {
   providers: [
@@ -10,12 +10,13 @@ const config: NextAuthConfig = {
       authorization: {
         params: {
           // TODO: dont ask user for permissions if already granted
-          scope: 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/youtube',
-          prompt: "consent",
-          access_type: "offline",
-          response_type: "code"
-        }
-      }
+          scope:
+            'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/youtube',
+          prompt: 'consent',
+          access_type: 'offline',
+          response_type: 'code',
+        },
+      },
     }),
   ],
   session: {
@@ -24,7 +25,7 @@ const config: NextAuthConfig = {
   },
   secret: process.env.AUTH_SECRET,
   callbacks: {
-    async jwt({token, user, account, profile}) {
+    async jwt({ token, user, account, profile }) {
       if (user) token.userId = user.id;
       if (account) {
         token.accessToken = account.access_token;
@@ -35,10 +36,9 @@ const config: NextAuthConfig = {
       // TODO: introduce a refresh token rotation
       // https://next-auth.js.org/v3/tutorials/refresh-token-rotation
 
-      return token
+      return token;
     },
-    async session({session, token, user, newSession}) {
-
+    async session({ session, token, user, newSession }) {
       if (token) {
         // I've followed this example https://next-auth.js.org/v3/tutorials/refresh-token-rotation
         // bot for this for some reason types are not correct (probably I'm using the latest version of next-auth)
@@ -50,13 +50,9 @@ const config: NextAuthConfig = {
         session.refreshToken = token.refreshToken;
       }
 
-
-      return session
+      return session;
     },
   },
-}
+};
 
-export const {auth, handlers} = NextAuth(config)
-
-
-
+export const { auth, handlers } = NextAuth(config);

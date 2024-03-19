@@ -1,5 +1,5 @@
-import {Video} from "@/components/Table";
-import {YoutubeVideo} from "@/data/types";
+import { Video } from '@/components/Table';
+import { YoutubeVideo } from '@/data/types';
 
 export const prepareDataForYTVideos = (video: YoutubeVideo): Video => ({
   playlistElementId: video.id,
@@ -8,4 +8,4 @@ export const prepareDataForYTVideos = (video: YoutubeVideo): Video => ({
   watchCount: 0,
   dateAdded: video.snippet.publishedAt,
   thumbnail: video.snippet.thumbnails.default.url,
-})
+});
