@@ -37,8 +37,9 @@ Maybe that was ambitious stack for couple days, but I wanted to learn more about
 
 ### Disclaimer 
 
-Some edge case errors can happen :) But for POC I guess it's fine.
-There can be still (a bit) of the mess it the code.
+1. Some edge case errors can happen :) But for POC I guess it's fine.
+2. There can be still (a bit) of the mess it the code.
+3. App is not pretty, so don't burn your eyes (I recently prefer to go with ant design but used mui as in requirements)
 
 ### How to test it?
 
