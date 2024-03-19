@@ -3,9 +3,11 @@ import { TextField, Button, Alert, Typography } from '@mui/material';
 import styled from 'styled-components';
 import { Controller, useForm } from 'react-hook-form';
 import { pattern } from '@/data/utils';
+import { AxiosResponse } from 'axios';
+import { UseMutateAsyncFunction } from '@tanstack/react-query';
 
 interface AddVideoBoxProps {
-  onAdd: (id: string) => Promise<void>;
+  onAdd: UseMutateAsyncFunction<AxiosResponse<any, any>, Error, string, unknown>;
   isError: boolean;
   isLoading: boolean;
   isSuccess: boolean;
@@ -40,9 +42,11 @@ export const AddVideoBox: React.FC<AddVideoBoxProps> = ({
   } = useForm();
 
   const handlVideoSubmit = (url: string) => {
-    onAdd(url).then(() => {
-      reset();
-    }).catch(() => {});
+    onAdd(url)
+      .then(() => {
+        reset();
+      })
+      .catch(() => {});
   };
 
   return (
