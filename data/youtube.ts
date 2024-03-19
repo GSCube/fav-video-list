@@ -1,9 +1,25 @@
 import useSWR from 'swr';
 import { useSession } from 'next-auth/react';
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import { youtubeParser } from '@/data/utils';
+import { UseMutateAsyncFunction } from '@tanstack/react-query';
 
 const YOUTUBE_BASE_URL = 'https://www.googleapis.com/youtube/v3';
+export const REDIRECT_URL = '/api/auth/signin?callbackUrl=/';
+
+// Make requests in interval so user can see the changes in real time
+// and to fetch latest data after adding or deleting a video
+// as for some reason the data is not updated immediately after adding or deleting a video
+
+export const refetchInterval = 2000; // 2 seconds
+
+export const handleDeleteAll = async (
+  moviesIds: string[],
+  handleAsyncDelete: UseMutateAsyncFunction<AxiosResponse<any, any>, Error, string, void>,
+) => {
+  await Promise.all(moviesIds?.map((id) => handleAsyncDelete(id)));
+};
+
 
 const PATHS: {
   [key: string]: string;

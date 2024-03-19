@@ -28,6 +28,8 @@ export const AddVideoBox: React.FC<AddVideoBoxProps> = (
   }) => {
   const [url, setUrl] = React.useState('');
 
+
+  // TODO Add handling by form with validation with React Hook Form
   return (
     <>
       {isError && <Alert severity="error">Wystąpił problem z dodaniem filmu</Alert>}
