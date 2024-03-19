@@ -40,6 +40,7 @@ export const addToFavorites = (accessToken: string, id: string) => axios.post(`$
 })
 
 
+// Playground to remove, just left it to show the development process
 // Fetch solution experiment
 export const fetchFavoritesWithFetch = async (accessToken: string) => {
   if (!accessToken) {
@@ -80,10 +81,10 @@ export const useYoutubeFavVideos = () => {
 
   // @ts-ignore
   const {accessToken} = session || {}
-  // @ts-ignore
   const {
     data,
     error,
+    // @ts-ignore
     isLoading
   } = useSWR(accessToken ? `${YOUTUBE_BASE_URL + PATHS.PLAYLIST_ITEMS}?access_token=${accessToken}&part=snippet&playlistId=LL` : null, fetcher)
 
