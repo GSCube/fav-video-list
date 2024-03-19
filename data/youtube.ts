@@ -20,7 +20,6 @@ export const handleDeleteAll = async (
   await Promise.all(moviesIds?.map((id) => handleAsyncDelete(id)));
 };
 
-
 const PATHS: {
   [key: string]: string;
 } = {
@@ -75,8 +74,6 @@ export const addToFavorites = (accessToken: string, id: string) =>
       },
     },
   );
-
-
 
 // Fetch solution experiment
 export const fetchFavoritesWithFetch = async (accessToken: string) => {

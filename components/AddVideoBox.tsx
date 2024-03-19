@@ -19,15 +19,13 @@ const Wrapper = styled.div`
   background-color: #f5f5f5;
 `;
 
-export const AddVideoBox: React.FC<AddVideoBoxProps> = (
-  {
-    onAdd,
-    isError,
-    isLoading,
-    isSuccess,
-  }) => {
+export const AddVideoBox: React.FC<AddVideoBoxProps> = ({
+  onAdd,
+  isError,
+  isLoading,
+  isSuccess,
+}) => {
   const [url, setUrl] = React.useState('');
-
 
   // TODO Add handling by form with validation with React Hook Form
   return (

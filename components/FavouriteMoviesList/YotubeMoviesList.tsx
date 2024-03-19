@@ -6,7 +6,7 @@ import { Typography, Button, Modal, CircularProgress } from '@mui/material';
 import { Video, VideoTable } from '../Table';
 import { Box } from '@mui/system';
 import YouTube from 'react-youtube';
-import { modalStyle } from '@/components/FavouriteMoviesList/styles';
+import { modalStyle, Wrapper } from '@/components/FavouriteMoviesList/styles';
 import { prepareDataForYTVideos } from '@/components/FavouriteMoviesList/utils';
 import {
   addLike,
@@ -16,16 +16,11 @@ import {
   REDIRECT_URL,
   refetchInterval,
 } from '@/data/youtube';
-import {
-  useQuery,
-  useMutation,
-  useQueryClient,
-} from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { AddVideoBox } from '@/components/AddVideoBox';
 import { AxiosError } from 'axios';
-
 
 export const YoutubeMoviesList = () => {
   const ref = React.useRef(0);
@@ -110,12 +105,17 @@ export const YoutubeMoviesList = () => {
   }
 
   return (
-    <section>
+    <Wrapper>
       <Typography variant="h3" component="h2">
-        Favorites Movies list
+        Favorites YT Video list
       </Typography>
 
-      <AddVideoBox onAdd={handleAdd} isError={isAddError} isLoading={isPending} isSuccess={isSuccess} />
+      <AddVideoBox
+        onAdd={handleAdd}
+        isError={isAddError}
+        isLoading={isPending}
+        isSuccess={isSuccess}
+      />
 
       {tableData && (
         <VideoTable
@@ -146,14 +146,16 @@ export const YoutubeMoviesList = () => {
           <YouTube videoId={selectedVideoId} />
         </Box>
       </Modal>
-      <Button onClick={() => refetch()}>
-        <RefreshIcon />
-        Refresh
-      </Button>
-      <Button onClick={() => handleDeleteAll(moviesIds, handleAsyncDelete)}>
-        <DeleteIcon />
-        Delete all (from this page)
-      </Button>
-    </section>
+      <div>
+        <Button onClick={() => refetch()}>
+          <RefreshIcon />
+          Refresh
+        </Button>
+        <Button onClick={() => handleDeleteAll(moviesIds, handleAsyncDelete)}>
+          <DeleteIcon />
+          Delete all (from this page)
+        </Button>
+      </div>
+    </Wrapper>
   );
 };
