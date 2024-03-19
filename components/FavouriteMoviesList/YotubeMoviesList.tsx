@@ -76,7 +76,7 @@ export const YoutubeMoviesList = () => {
   });
 
   const {
-    mutate: handleAdd,
+    mutateAsync: handleAdd,
     isError: isAddError,
     isPending,
     isSuccess,

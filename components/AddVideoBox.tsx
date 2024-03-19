@@ -5,7 +5,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { pattern } from '@/data/utils';
 
 interface AddVideoBoxProps {
-  onAdd: (id: string) => void;
+  onAdd: (id: string) => Promise<void>;
   isError: boolean;
   isLoading: boolean;
   isSuccess: boolean;
@@ -33,18 +33,24 @@ export const AddVideoBox: React.FC<AddVideoBoxProps> = ({
   isSuccess,
 }) => {
   const {
-    register,
     handleSubmit,
     control,
+    reset,
     formState: { errors },
   } = useForm();
+
+  const handlVideoSubmit = (url: string) => {
+    onAdd(url).then(() => {
+      reset();
+    }).catch(() => {});
+  };
 
   return (
     <Outer>
       {isError && <Alert severity="error">Wystąpił problem z dodaniem filmu</Alert>}
       {isSuccess && <Alert severity="info">Dodano</Alert>}
       <Typography variant="h6">Add liked video</Typography>
-      <form onSubmit={handleSubmit(({ url }) => onAdd(url))}>
+      <form onSubmit={handleSubmit(({ url }) => handlVideoSubmit(url))}>
         <Wrapper>
           <Controller
             name="url"
