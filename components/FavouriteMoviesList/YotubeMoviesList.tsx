@@ -48,7 +48,7 @@ export const YoutubeMoviesList = () => {
     queryKey: ['videos', nextPageToken],
     queryFn: () => fetchFavorites(accessToken, nextPageToken),
     enabled: !!accessToken,
-    refetchInterval,
+    // refetchInterval,
   });
 
   if ((error as AxiosError)?.response?.status === 401) {

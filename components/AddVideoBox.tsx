@@ -1,6 +1,8 @@
 import React from 'react';
-import { Input, Button, Alert, Typography } from '@mui/material';
+import { TextField, Button, Alert, Typography } from '@mui/material';
 import styled from 'styled-components';
+import { Controller, useForm } from 'react-hook-form';
+import { pattern } from '@/data/utils';
 
 interface AddVideoBoxProps {
   onAdd: (id: string) => void;
@@ -11,8 +13,9 @@ interface AddVideoBoxProps {
 
 const Wrapper = styled.div`
   display: flex;
-  align-items: center;
-  margin-top: 20px;
+  align-items: flex-start;
+  margin-top: 8px;
+  gap: 16px;
 `;
 
 const Outer = styled.div`
@@ -29,24 +32,49 @@ export const AddVideoBox: React.FC<AddVideoBoxProps> = ({
   isLoading,
   isSuccess,
 }) => {
-  const [url, setUrl] = React.useState('');
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+  } = useForm();
 
-  // TODO Add handling by form with validation with React Hook Form
   return (
     <Outer>
       {isError && <Alert severity="error">Wystąpił problem z dodaniem filmu</Alert>}
       {isSuccess && <Alert severity="info">Dodano</Alert>}
       <Typography variant="h6">Add liked video</Typography>
-      <Wrapper>
-        <Input
-          placeholder="Wpisz URL / ID filmu"
-          value={url}
-          onChange={({ target }) => setUrl(target.value)}
-        />
-        <Button  disabled={isLoading} onClick={() => onAdd(url)}>
-          Dodaj
-        </Button>
-      </Wrapper>
+      <form onSubmit={handleSubmit(({ url }) => onAdd(url))}>
+        <Wrapper>
+          <Controller
+            name="url"
+            control={control}
+            defaultValue=""
+            rules={{
+              required: 'Pole wymagane',
+            }}
+            render={({ field }) => (
+              <TextField
+                size={'small'}
+                style={{ width: '300px' }}
+                placeholder="Wpisz URL / ID filmu"
+                {...field}
+                variant="outlined"
+                error={!!errors.url}
+                helperText={errors.url ? (errors.url.message as string) : ' '}
+              />
+            )}
+          />
+          <Button
+            style={{ height: '40px' }}
+            variant="outlined"
+            type="submit"
+            disabled={isLoading}
+          >
+            Dodaj
+          </Button>
+        </Wrapper>
+      </form>
     </Outer>
   );
 };
