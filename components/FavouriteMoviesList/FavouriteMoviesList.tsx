@@ -7,19 +7,22 @@ import {Video, VideoTable} from '../Table';
 import {Box} from "@mui/system";
 import YouTube from "react-youtube";
 import {modalStyle} from "@/components/FavouriteMoviesList/styles";
-import {formatYoutubePlaylist} from "@/components/FavouriteMoviesList/utils";
+import {prepareDataForYTVideos} from "@/components/FavouriteMoviesList/utils";
 import {addToFavorites, deleteFromFavorites, fetchFavorites} from "@/data/youtube";
-import {useQuery, useMutation, useQueryClient} from "@tanstack/react-query";
+import {useQuery, useMutation, useQueryClient, UseMutateAsyncFunction} from "@tanstack/react-query";
 import RefreshIcon from '@mui/icons-material/Refresh';
 import DeleteIcon from '@mui/icons-material/Delete';
 import {AddVideoBox} from "@/components/AddVideoBox";
-import {AxiosError} from "axios";
+import {AxiosError, AxiosResponse} from "axios";
 
 
-const handleDeleteAll = async (moviesIds, handleAsyncDelete) => {
+const handleDeleteAll = async (moviesIds: string[], handleAsyncDelete: UseMutateAsyncFunction<AxiosResponse<any, any>, Error, string, void>) => {
   await Promise.all(moviesIds?.map((id) => handleAsyncDelete(id)))
 }
 
+// Make requests in interval so user can see the changes in real time
+// and to fetch latest data after adding or deleting a video
+// as for some reason the data is not updated immediately after adding or deleting a video
 const refetchInterval = 2000 // 2 seconds
 
 const REDIRECT_URL = '/api/auth/signin?callbackUrl=/'
@@ -52,7 +55,8 @@ export const FavouriteMoviesList = () => {
   }
 
   const videos = playlists?.data?.items
-  const tableData: Video[] = videos?.map(formatYoutubePlaylist)
+  const tableData: Video[] = videos?.map(prepareDataForYTVideos);
+
   const pageInfo = playlists?.data?.pageInfo
   const moviesIds = tableData?.map(({playlistElementId}) => playlistElementId)
 
@@ -60,9 +64,10 @@ export const FavouriteMoviesList = () => {
     mutationFn: (id: string) => deleteFromFavorites(accessToken, id),
     onSuccess: async () => {
       await queryClient.invalidateQueries({queryKey: ['videos']})
-    },})
+    },
+  })
 
-  const { mutateAsync:handleAsyncDelete} = useMutation({
+  const {mutateAsync: handleAsyncDelete} = useMutation({
     mutationFn: (id: string) => deleteFromFavorites(accessToken, id),
     onMutate: async (id: string) => {
       await queryClient.cancelQueries({queryKey: ['videos']})
@@ -76,7 +81,6 @@ export const FavouriteMoviesList = () => {
     },
   })
 
-
   const handlePlay = (id: string) => {
     setSelectedVideoId(id)
     setOpen(true)
@@ -85,7 +89,6 @@ export const FavouriteMoviesList = () => {
   if (isLoading || !videos) {
     return <CircularProgress/>
   }
-
 
   if (isError) {
     return <Typography variant="h3" component="h2">Error</Typography>
@@ -97,7 +100,7 @@ export const FavouriteMoviesList = () => {
         Favorites Movies list
       </Typography>
 
-      <AddVideoBox onAdd={handleAdd} isError={isAddError} isLoading={isPending} />
+      <AddVideoBox onAdd={handleAdd} isError={isAddError} isLoading={isPending}/>
 
       {tableData && (
         <VideoTable
@@ -131,7 +134,8 @@ export const FavouriteMoviesList = () => {
         </Box>
       </Modal>
       <Button onClick={() => refetch()}><RefreshIcon/>Refresh</Button>
-      <Button onClick={() => handleDeleteAll(moviesIds, handleAsyncDelete)} ><DeleteIcon/>Delete all (from this page)</Button>
+      <Button onClick={() => handleDeleteAll(moviesIds, handleAsyncDelete)}><DeleteIcon/>Delete all (from this
+        page)</Button>
     </section>
   )
 }

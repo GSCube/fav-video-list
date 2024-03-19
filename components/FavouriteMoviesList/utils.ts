@@ -1,7 +1,7 @@
 import {Video} from "@/components/Table";
 import {YoutubeVideo} from "@/data/types";
 
-export const formatYoutubePlaylist = (video: YoutubeVideo): Video => ({
+export const prepareDataForYTVideos = (video: YoutubeVideo): Video => ({
   playlistElementId: video.id,
   videoId: video.snippet.resourceId.videoId,
   title: video.snippet.title,
