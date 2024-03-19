@@ -43,7 +43,7 @@ There can be still (a bit) of the mess it the code.
 ### How to test it?
 
 Link to deployed app: https://fav-video-list.vercel.app
-To login you can use google account, but I need to add your email to the list of allowed users, so please let me know
+To login you can use **google account**, but I need to add your email to the list of allowed users, so please let me know
 what email you want to use if you are eager to test it. Good luck and have fun!
 
 ## Getting Started
