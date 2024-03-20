@@ -13,3 +13,13 @@ export const Wrapper = styled.div`
   flex-direction: column;
   width: 100%;
 `;
+
+export const FavouriteMoviesListWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  padding: 16px;
+  gap: 60px;
+  max-width: 1000px;
+  margin: 0 auto;
+`;

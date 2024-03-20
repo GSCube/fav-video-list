@@ -1,5 +1,6 @@
 export interface YoutubeVideo {
   id: string;
+  views: number;
   snippet: {
     title: string;
     resourceId: {

@@ -35,7 +35,7 @@ Maybe that was ambitious stack for couple days, but I wanted to learn more about
    sure if api returns it all or need to do some while loop beforehand
 4. Pagination could be improved when deleting last page of videos.
 
-### Disclaimer 
+### Disclaimer
 
 1. Some edge case errors can happen :) But for POC I guess it's fine.
 2. There can be still (a bit) of the mess it the code.
@@ -49,7 +49,20 @@ what email you want to use if you are eager to test it. Good luck and have fun!
 
 ## Getting Started
 
-First, run the development server:
+1. Copy `.env.local.example` to `.env.local` and fill in the values with command bellow:
+
+```bash
+cp .env.local.example .env.local
+```
+
+2. Add your google client id and secret to `.env.local` file.
+3. generate AUTH_SECRET with command
+
+```bash
+openssl rand -base64 32
+```
+
+Run the development server:
 
 ```bash
 npm run dev

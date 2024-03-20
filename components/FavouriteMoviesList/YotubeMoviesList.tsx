@@ -9,12 +9,12 @@ import YouTube from 'react-youtube';
 import { modalStyle, Wrapper } from '@/components/FavouriteMoviesList/styles';
 import { prepareDataForYTVideos } from '@/components/FavouriteMoviesList/utils';
 import {
-  addLike,
+  addToFavourites,
   deleteFromFavorites,
-  fetchFavorites,
-  handleDeleteAll,
+  deleteAllFromFavourites,
   REDIRECT_URL,
   refetchInterval,
+  getFavoriteVideosWithViews,
 } from '@/data/youtube';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import RefreshIcon from '@mui/icons-material/Refresh';
@@ -22,66 +22,63 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { AddVideoBox } from '@/components/AddVideoBox';
 import { AxiosError } from 'axios';
 
-export const YoutubeMoviesList = () => {
+interface YoutubeMoviesListProps {
+  accessToken: string;
+}
+
+export const YoutubeMoviesList: React.FC<YoutubeMoviesListProps> = ({ accessToken }) => {
   const ref = React.useRef(0);
   const [nextPageToken, setNextPageToken] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
   const [selectedVideoId, setSelectedVideoId] = useState('');
-  const { data: session } = useSession({
-    required: true,
-    onUnauthenticated() {
-      redirect(REDIRECT_URL);
-    },
-  });
-
-  // @ts-ignore
-  const { accessToken } = session || {};
 
   const {
     data: playlists,
-    isError,
-    isLoading,
+    isError: isListError,
+    isLoading: isListLoading,
     refetch,
     error,
   } = useQuery({
     queryKey: ['videos', nextPageToken],
-    queryFn: () => fetchFavorites(accessToken, nextPageToken),
+    queryFn: () => getFavoriteVideosWithViews(accessToken, nextPageToken),
     enabled: !!accessToken,
+    retry: false,
     refetchInterval,
   });
 
-  if ((error as AxiosError)?.response?.status === 401) {
+  if ((error as AxiosError)?.response?.status === 401 || (error as AxiosError)?.response?.status === 403) {
     redirect(REDIRECT_URL);
   }
 
   const videos = playlists?.data?.items;
+
   const tableData: Video[] = videos?.map(prepareDataForYTVideos);
 
   const pageInfo = playlists?.data?.pageInfo;
-  const moviesIds = tableData?.map(({ playlistElementId }) => playlistElementId);
+  const moviesIds = tableData?.map(({ playlistElementId, videoId }) => ({ playlistElementId, videoId }));
 
-  const { mutate: handleDelete } = useMutation({
-    mutationFn: (id: string) => deleteFromFavorites(accessToken, id),
+  const { mutateAsync: handleDelete, isPending: isDeletePending } = useMutation({
+    mutationFn: async ({playlistElementId, videoId}: {playlistElementId: string, videoId: string}) => await deleteFromFavorites(accessToken, playlistElementId, videoId),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['videos'] });
     },
   });
 
   const { mutateAsync: handleAsyncDelete } = useMutation({
-    mutationFn: (id: string) => deleteFromFavorites(accessToken, id),
-    onMutate: async (id: string) => {
-      await queryClient.cancelQueries({ queryKey: ['videos'] });
+    mutationFn: () => deleteAllFromFavourites(accessToken, moviesIds),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['videos'] });
     },
   });
 
   const {
     mutateAsync: handleAdd,
     isError: isAddError,
-    isPending,
-    isSuccess,
+    isPending: isAddPending,
+    isSuccess: isAddSuccess,
   } = useMutation({
-    mutationFn: (id: string) => addLike(accessToken, id),
+    mutationFn: (id: string) => addToFavourites(accessToken, id),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['videos'] });
     },
@@ -92,11 +89,7 @@ export const YoutubeMoviesList = () => {
     setOpen(true);
   };
 
-  if (isLoading || !videos) {
-    return <CircularProgress />;
-  }
-
-  if (isError) {
+  if (isListError) {
     return (
       <Typography variant="h3" component="h2">
         Error
@@ -106,22 +99,23 @@ export const YoutubeMoviesList = () => {
 
   return (
     <Wrapper>
-      <Typography variant="h3" component="h2">
-        Favorites YT Video list
+      <Typography variant="h4" component="h2">
+        Youtube favorite videos list
       </Typography>
 
       <AddVideoBox
         onAdd={handleAdd}
         isError={isAddError}
-        isLoading={isPending}
-        isSuccess={isSuccess}
+        isLoading={isAddPending}
+        isSuccess={isAddSuccess}
       />
 
       {tableData && (
         <VideoTable
+          isLoading={isListLoading}
           videos={tableData}
           onPlay={handlePlay}
-          onDelete={(id) => handleDelete(id)}
+          onDelete={({playlistElementId, videoId}) => handleDelete({playlistElementId, videoId})}
           onPageChange={(newPage) => {
             if (newPage > ref.current) {
               setNextPageToken(playlists?.data?.nextPageToken);
@@ -146,16 +140,16 @@ export const YoutubeMoviesList = () => {
           <YouTube videoId={selectedVideoId} />
         </Box>
       </Modal>
-      <div>
+      <Box mt={2}>
         <Button onClick={() => refetch()}>
           <RefreshIcon />
           Refresh
         </Button>
-        <Button onClick={() => handleDeleteAll(moviesIds, handleAsyncDelete)}>
+        <Button onClick={() => handleAsyncDelete()}>
           <DeleteIcon />
           Delete all (from this page)
         </Button>
-      </div>
+      </Box>
     </Wrapper>
   );
 };

@@ -1,10 +1,9 @@
 import React from 'react';
 import { TextField, Button, Alert, Typography } from '@mui/material';
-import styled from 'styled-components';
 import { Controller, useForm } from 'react-hook-form';
-import { pattern } from '@/data/utils';
 import { AxiosResponse } from 'axios';
 import { UseMutateAsyncFunction } from '@tanstack/react-query';
+import { Outer, Wrapper } from '@/components/AddVideoBox/styles';
 
 interface AddVideoBoxProps {
   onAdd: UseMutateAsyncFunction<AxiosResponse<any, any>, Error, string, unknown>;
@@ -12,21 +11,6 @@ interface AddVideoBoxProps {
   isLoading: boolean;
   isSuccess: boolean;
 }
-
-const Wrapper = styled.div`
-  display: flex;
-  align-items: flex-start;
-  margin-top: 8px;
-  gap: 16px;
-`;
-
-const Outer = styled.div`
-  display: flex;
-  margin-top: 20px;
-  padding: 16px;
-  background-color: white;
-  flex-direction: column;
-`;
 
 export const AddVideoBox: React.FC<AddVideoBoxProps> = ({
   onAdd,
@@ -61,13 +45,13 @@ export const AddVideoBox: React.FC<AddVideoBoxProps> = ({
             control={control}
             defaultValue=""
             rules={{
-              required: 'Pole wymagane',
+              required: 'This field is required',
             }}
             render={({ field }) => (
               <TextField
                 size={'small'}
                 style={{ width: '300px' }}
-                placeholder="Wpisz URL / ID filmu"
+                placeholder="Add video URL / ID"
                 {...field}
                 variant="outlined"
                 error={!!errors.url}
@@ -81,7 +65,7 @@ export const AddVideoBox: React.FC<AddVideoBoxProps> = ({
             type="submit"
             disabled={isLoading}
           >
-            Dodaj
+            Add
           </Button>
         </Wrapper>
       </form>
