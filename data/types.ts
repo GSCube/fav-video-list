@@ -1,6 +1,5 @@
-export interface YoutubeVideo {
+export interface YTPlaylistItem {
   id: string;
-  views: number;
   snippet: {
     title: string;
     resourceId: {
@@ -13,4 +12,24 @@ export interface YoutubeVideo {
       };
     };
   };
+}
+
+export interface YTVideo {
+  id: string;
+  statistics: {
+    viewCount: string;
+  };
+}
+
+export interface FavVideosWithViewsResponse extends YTPlaylistItem {
+  views: number;
+}
+
+export interface Video {
+  playlistElementId: string;
+  videoId: string;
+  title: string;
+  thumbnail: string;
+  dateAdded: string;
+  viewCount: number;
 }

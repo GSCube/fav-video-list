@@ -5,13 +5,18 @@
 
 import { Typography, Alert } from '@mui/material';
 import { Box } from '@mui/system';
+import { VideoPlatformWrapper } from '@/components/VideoPlatformWrapper';
 
 export const VimeoMoviesList = () => {
   return (
-    <div>
-      <Typography variant="h4" component="h4">
-        Vimeo favourite movies list (will be in future here...)
-      </Typography>
+    <VideoPlatformWrapper
+      title={'Vimeo favourite movies list (will be in future here...)'}
+      onDelete={() => {}}
+      onModalClose={() => {}}
+      onRefresh={() => {}}
+      isModalOpen={false}
+      selectedVideoId={''}
+    >
       <Box mb={2}>
         <Typography variant="body2">
           Here (or in setting) user will need to authenticate with vimeo account
@@ -31,6 +36,6 @@ export const VimeoMoviesList = () => {
           deleting and adding videos would be much more complicated
         </Typography>
       </Alert>
-    </div>
+    </VideoPlatformWrapper>
   );
 };

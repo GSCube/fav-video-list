@@ -1,9 +1,11 @@
 import React from 'react';
-import { TextField, Button, Alert, Typography } from '@mui/material';
+import { TextField, Alert, Typography } from '@mui/material';
 import { Controller, useForm } from 'react-hook-form';
 import { AxiosResponse } from 'axios';
 import { UseMutateAsyncFunction } from '@tanstack/react-query';
 import { Outer, Wrapper } from '@/components/AddVideoBox/styles';
+import { Box } from '@mui/system';
+import { LoadingButton } from '@mui/lab';
 
 interface AddVideoBoxProps {
   onAdd: UseMutateAsyncFunction<AxiosResponse<any, any>, Error, string, unknown>;
@@ -35,8 +37,14 @@ export const AddVideoBox: React.FC<AddVideoBoxProps> = ({
 
   return (
     <Outer>
-      {isError && <Alert severity="error">Wystąpił problem z dodaniem filmu</Alert>}
-      {isSuccess && <Alert severity="info">Dodano</Alert>}
+      <Box mb={2}>
+        {isError && (
+          <Alert severity="error">
+            There was an error while adding video. Check url or video id and try again.
+          </Alert>
+        )}
+        {isSuccess && <Alert severity="info">Added successfully</Alert>}
+      </Box>
       <Typography variant="h6">Add liked video</Typography>
       <form onSubmit={handleSubmit(({ url }) => handlVideoSubmit(url))}>
         <Wrapper>
@@ -50,23 +58,27 @@ export const AddVideoBox: React.FC<AddVideoBoxProps> = ({
             render={({ field }) => (
               <TextField
                 size={'small'}
-                style={{ width: '300px' }}
-                placeholder="Add video URL / ID"
+                style={{ width: '100%' }}
+                placeholder="Add video url or video id"
                 {...field}
                 variant="outlined"
                 error={!!errors.url}
-                helperText={errors.url ? (errors.url.message as string) : ' '}
+                helperText={
+                  errors.url
+                    ? (errors.url.message as string)
+                    : 'eg. https://www.youtube.com/watch?v=videoId or videoId'
+                }
               />
             )}
           />
-          <Button
+          <LoadingButton
+            loading={isLoading}
             style={{ height: '40px' }}
             variant="outlined"
             type="submit"
-            disabled={isLoading}
           >
             Add
-          </Button>
+          </LoadingButton>
         </Wrapper>
       </form>
     </Outer>

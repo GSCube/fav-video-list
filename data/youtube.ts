@@ -1,8 +1,8 @@
-import axios, { AxiosResponse } from 'axios';
-import { youtubeParser } from '@/data/utils';
-import { UseMutateAsyncFunction } from '@tanstack/react-query';
+import axios from 'axios';
+import { getYoutubeVideoId } from '@/data/utils';
+import { YTPlaylistItem, YTVideo } from '@/data/types';
 
-export const REDIRECT_URL = '/api/auth/signin?callbackUrl=/';
+export const SIGN_IN_REDIRECT_URL = '/api/auth/signin?callbackUrl=/';
 const YOUTUBE_BASE_URL = 'https://www.googleapis.com/youtube/v3';
 const PATHS: {
   [key: string]: string;
@@ -11,8 +11,7 @@ const PATHS: {
   VIDEOS: '/videos',
 };
 
-
-export const refetchInterval = 600000; // set interval to 10min
+export const favouriteVideosFetchInterval = 600000; // set interval to 10min
 
 export const getFavoriteVideos = async (
   accessToken: string,
@@ -31,11 +30,13 @@ export const getFavoriteVideosWithViews = async (
   nextPageToken?: string | null,
 ) => {
   const listResponse = await getFavoriteVideos(accessToken, nextPageToken);
-  const ids = listResponse.data.items.map((item: any) => item.snippet.resourceId.videoId);
+  const ids = listResponse.data.items.map(
+    (item: YTPlaylistItem) => item.snippet.resourceId.videoId,
+  );
 
   const viewsResponse = await getViews(accessToken, ids);
 
-  const items = listResponse.data.items.map((item: any, index: number) => {
+  const items = listResponse.data.items.map((item: YTVideo, index: number) => {
     const views = viewsResponse.data.items[index].statistics.viewCount;
     return {
       ...item,
@@ -55,8 +56,8 @@ export const getViews = async (accessToken: string, ids: string[]) => {
 };
 
 export const addToFavourites = async (accessToken: string, id: string) => {
-  const parsedId = youtubeParser(id);
-  const response =  await axios.post(
+  const parsedId = getYoutubeVideoId(id);
+  const response = await axios.post(
     `${YOUTUBE_BASE_URL + PATHS.VIDEOS}/rate?access_token=${accessToken}&id=${parsedId}&rating=like`,
   );
 
@@ -68,26 +69,27 @@ export const addToFavourites = async (accessToken: string, id: string) => {
       if (resp.data.items.length > 0) {
         shouldContinuePolling = false;
       }
-    }
-    catch (e) {}
-  }
+    } catch (e) {}
+  };
 
-  await validateResponse()
+  await validateResponse();
 
   while (shouldContinuePolling) {
-    await wait(3800);
-    await validateResponse()
+    await wait(800);
+    await validateResponse();
   }
 
   return response;
 };
 
-
-
-export const deleteFromFavorites = async (accessToken: string, playlistElementId: string, videoId: string) => {
+export const deleteFromFavorites = async (
+  accessToken: string,
+  playlistElementId: string,
+  videoId: string,
+) => {
   const response = await axios.delete(
     `${YOUTUBE_BASE_URL + PATHS.PLAYLIST_ITEMS}?access_token=${accessToken}&id=${playlistElementId}`,
-  )
+  );
 
   let shouldContinuePolling = true;
 
@@ -96,27 +98,31 @@ export const deleteFromFavorites = async (accessToken: string, playlistElementId
     if (resp.data.items.length === 0) {
       shouldContinuePolling = false;
     }
-  }
+  };
 
-  await validateResponse()
+  await validateResponse();
 
   while (shouldContinuePolling) {
     await wait(800);
-    await validateResponse()
+    await validateResponse();
   }
 
   return response;
 };
 
 const wait = function (ms = 1000) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     setTimeout(resolve, ms);
   });
 };
 
 export const deleteAllFromFavourites = async (
   accessToken: string,
-  moviesIds: {playlistElementId: string, videoId: string}[],
+  moviesIds: { playlistElementId: string; videoId: string }[],
 ) => {
-  await Promise.all(moviesIds?.map(({ playlistElementId, videoId }) => deleteFromFavorites(accessToken, playlistElementId, videoId)));
+  await Promise.all(
+    moviesIds?.map(({ playlistElementId, videoId }) =>
+      deleteFromFavorites(accessToken, playlistElementId, videoId),
+    ),
+  );
 };

@@ -3,14 +3,14 @@ import { YoutubeMoviesList } from './YotubeMoviesList';
 import { VimeoMoviesList } from '@/components/FavouriteMoviesList/VimeoMoviesList';
 import { useSession } from 'next-auth/react';
 import { redirect } from 'next/navigation';
-import { REDIRECT_URL } from '@/data/youtube';
+import { SIGN_IN_REDIRECT_URL } from '@/data/youtube';
 import { FavouriteMoviesListWrapper } from '@/components/FavouriteMoviesList/styles';
 
 export const FavouriteMoviesList = () => {
   const { data: session } = useSession({
     required: true,
     onUnauthenticated() {
-      redirect(REDIRECT_URL);
+      redirect(SIGN_IN_REDIRECT_URL);
     },
   });
 

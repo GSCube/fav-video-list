@@ -1,65 +1,72 @@
 'use client';
-import { useSession } from 'next-auth/react';
+
 import { redirect } from 'next/navigation';
 import React, { useState } from 'react';
-import { Typography, Button, Modal, CircularProgress } from '@mui/material';
-import { Video, VideoTable } from '../Table';
-import { Box } from '@mui/system';
-import YouTube from 'react-youtube';
-import { modalStyle, Wrapper } from '@/components/FavouriteMoviesList/styles';
-import { prepareDataForYTVideos } from '@/components/FavouriteMoviesList/utils';
+import { Typography } from '@mui/material';
+import { VideoTable } from '../VideoTable';
+import { formatToTableData } from '@/components/FavouriteMoviesList/utils';
 import {
   addToFavourites,
   deleteFromFavorites,
   deleteAllFromFavourites,
-  REDIRECT_URL,
-  refetchInterval,
+  SIGN_IN_REDIRECT_URL,
+  favouriteVideosFetchInterval,
   getFavoriteVideosWithViews,
 } from '@/data/youtube';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import DeleteIcon from '@mui/icons-material/Delete';
 import { AddVideoBox } from '@/components/AddVideoBox';
 import { AxiosError } from 'axios';
+import { VideoPlatformWrapper } from '@/components/VideoPlatformWrapper';
+import { Video } from '@/data/types';
 
 interface YoutubeMoviesListProps {
   accessToken: string;
 }
 
 export const YoutubeMoviesList: React.FC<YoutubeMoviesListProps> = ({ accessToken }) => {
-  const ref = React.useRef(0);
+  const queryClient = useQueryClient();
+  const [page, setPage] = useState(0);
   const [nextPageToken, setNextPageToken] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
-  const queryClient = useQueryClient();
   const [selectedVideoId, setSelectedVideoId] = useState('');
 
   const {
     data: playlists,
     isError: isListError,
     isLoading: isListLoading,
-    refetch,
+    refetch: refetchFavoriteVideosWithViews,
     error,
   } = useQuery({
     queryKey: ['videos', nextPageToken],
     queryFn: () => getFavoriteVideosWithViews(accessToken, nextPageToken),
     enabled: !!accessToken,
     retry: false,
-    refetchInterval,
+    refetchInterval: favouriteVideosFetchInterval,
   });
 
-  if ((error as AxiosError)?.response?.status === 401 || (error as AxiosError)?.response?.status === 403) {
-    redirect(REDIRECT_URL);
+  if (
+    (error as AxiosError)?.response?.status === 401 ||
+    (error as AxiosError)?.response?.status === 403
+  ) {
+    redirect(SIGN_IN_REDIRECT_URL);
   }
 
   const videos = playlists?.data?.items;
-
-  const tableData: Video[] = videos?.map(prepareDataForYTVideos);
-
+  const tableData: Video[] = videos?.map(formatToTableData);
   const pageInfo = playlists?.data?.pageInfo;
-  const moviesIds = tableData?.map(({ playlistElementId, videoId }) => ({ playlistElementId, videoId }));
+  const moviesIds = tableData?.map(({ playlistElementId, videoId }) => ({
+    playlistElementId,
+    videoId,
+  }));
 
   const { mutateAsync: handleDelete, isPending: isDeletePending } = useMutation({
-    mutationFn: async ({playlistElementId, videoId}: {playlistElementId: string, videoId: string}) => await deleteFromFavorites(accessToken, playlistElementId, videoId),
+    mutationFn: async ({
+      playlistElementId,
+      videoId,
+    }: {
+      playlistElementId: string;
+      videoId: string;
+    }) => await deleteFromFavorites(accessToken, playlistElementId, videoId),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['videos'] });
     },
@@ -98,11 +105,14 @@ export const YoutubeMoviesList: React.FC<YoutubeMoviesListProps> = ({ accessToke
   }
 
   return (
-    <Wrapper>
-      <Typography variant="h4" component="h2">
-        Youtube favorite videos list
-      </Typography>
-
+    <VideoPlatformWrapper
+      onModalClose={() => setOpen(false)}
+      isModalOpen={open}
+      selectedVideoId={selectedVideoId}
+      onRefresh={() => refetchFavoriteVideosWithViews()}
+      onDelete={() => handleAsyncDelete()}
+      title="Yotutube favourite videos"
+    >
       <AddVideoBox
         onAdd={handleAdd}
         isError={isAddError}
@@ -110,46 +120,26 @@ export const YoutubeMoviesList: React.FC<YoutubeMoviesListProps> = ({ accessToke
         isSuccess={isAddSuccess}
       />
 
-      {tableData && (
-        <VideoTable
-          isLoading={isListLoading}
-          videos={tableData}
-          onPlay={handlePlay}
-          onDelete={({playlistElementId, videoId}) => handleDelete({playlistElementId, videoId})}
-          onPageChange={(newPage) => {
-            if (newPage > ref.current) {
-              setNextPageToken(playlists?.data?.nextPageToken);
-            } else {
-              setNextPageToken(playlists?.data?.prevPageToken);
-            }
-            ref.current = newPage;
-          }}
-          totalResults={pageInfo?.totalResults}
-          rowsPerPage={pageInfo?.resultsPerPage}
-          page={ref.current}
-        />
-      )}
-
-      <Modal
-        open={open}
-        onClose={() => setOpen(false)}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
-        <Box sx={modalStyle}>
-          <YouTube videoId={selectedVideoId} />
-        </Box>
-      </Modal>
-      <Box mt={2}>
-        <Button onClick={() => refetch()}>
-          <RefreshIcon />
-          Refresh
-        </Button>
-        <Button onClick={() => handleAsyncDelete()}>
-          <DeleteIcon />
-          Delete all (from this page)
-        </Button>
-      </Box>
-    </Wrapper>
+      <VideoTable
+        isDataLoading={isListLoading}
+        isDeletePending={isDeletePending}
+        videos={tableData}
+        onPlay={handlePlay}
+        onDelete={({ playlistElementId, videoId }) =>
+          handleDelete({ playlistElementId, videoId })
+        }
+        onPageChange={(newPage) => {
+          if (newPage > page) {
+            setNextPageToken(playlists?.data?.nextPageToken);
+          } else {
+            setNextPageToken(playlists?.data?.prevPageToken);
+          }
+          setPage(newPage);
+        }}
+        totalResults={pageInfo?.totalResults}
+        rowsPerPage={pageInfo?.resultsPerPage}
+        page={page}
+      />
+    </VideoPlatformWrapper>
   );
 };
